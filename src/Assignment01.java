@@ -17,6 +17,7 @@ public class Assignment01 {
 		String readfile = null;
 		Scanner kb = new Scanner(System.in);
 		while(true) {
+			String data=null;
 			System.out.print("$ ");
 			command = kb.next();			
 			if(command.equals("read")) { 
@@ -25,8 +26,8 @@ public class Assignment01 {
 			else if(command.equals("size"))
 				getSize();
 			else if(command.equals("find")) {		
-				String data=null;
-				data=kb.next();
+				data=kb.nextLine();
+				data = data.substring(1);
 				findWord(data);
 			}
 			else if(command.equals("exit")) break;
@@ -51,12 +52,14 @@ public class Assignment01 {
 				String tmp=null;
 				tmp = inFile.readLine();
 				if(tmp==null) break;
+				String Rname = null;
 				String name = null;
 				String cont = null;
 				if(tmp.trim().equals("")) continue;
 				name=tmp.substring(0, tmp.indexOf(" ("));
 				cont=tmp.substring(tmp.indexOf(" (")+1,tmp.length());
-				dict[size]=new Dict(name,cont,samename);
+				Rname = Replace(name);				
+				dict[size]=new Dict(name,cont,samename,Rname);
 				if(size!=0 && dict[size-1].name.equalsIgnoreCase(name)) {							
 					dict[size-i].samename++;
 					i++;
@@ -78,15 +81,19 @@ public class Assignment01 {
 		dict = tmp;
 		BUFFER_SIZE *=2;
 	}
+	public static boolean getRname = false;
 	public static int getFind(String target,int begin, int end)
 	{
+		String realDict = null;
 		if(begin>end && end==0) { return -1;}
 		else if (begin>end){ return end;}
 		else {
 			int middle=(begin+end)/2;
-			if(dict[middle].name.equalsIgnoreCase(target)) {
-				findName = true; return middle;}
-			else if (dict[middle].name.compareToIgnoreCase(target)>0) 
+			if (getRname) realDict = dict[middle].Rname;
+			else realDict = dict[middle].name;
+			if(realDict.equalsIgnoreCase(target)) {
+				getRname = false; findName = true; return middle;}
+			else if (realDict.compareToIgnoreCase(target)>0) 
 				return getFind(target,begin,middle-1);
 			else 
 				return getFind(target,middle+1,end);
@@ -95,12 +102,19 @@ public class Assignment01 {
 	public static void findWord(String data)
 	{
 		int indexfind=0;
-		indexfind = getFind(data,0,size-1);
+		String Rdata=null;
+		Rdata=Replace(data);
+		if (data.equalsIgnoreCase(Rdata)) 
+			indexfind = getFind(data,0,size-1);
+		else {getRname = true;
+			indexfind = getFind(Rdata,0,size-1);
+		}
 		if (!findName) {
 			System.out.println("Not Found.");
 			if (indexfind==-1) return;
 			System.out.println(dict[indexfind].name+" "+dict[indexfind].cont.substring(0, dict[indexfind].cont.indexOf(")")+1));
 			System.out.println("- - -");
+			if(indexfind==size-1)return;
 			System.out.println(dict[indexfind+1].name+" "+dict[indexfind+1].cont.substring(0, dict[indexfind+1].cont.indexOf(")")+1));
 		}
 		else {
@@ -115,6 +129,13 @@ public class Assignment01 {
 				System.out.println(dict[flagindex+i].name+" "+dict[flagindex+i].cont);
 			findName = false;
 		}
+	}
+	public static String Replace(String data) 
+	{
+		data = data.replaceAll("-", "");
+		data = data.replaceAll("'", "");
+		data = data.replaceAll(" ", "");
+		return data;
 	}
 
 }
